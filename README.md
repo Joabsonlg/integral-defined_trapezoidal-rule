@@ -1,4 +1,4 @@
-## Integral Defined using the Trapezoid Rule
+## Integral Defined using the Trapezoidal Rule
 
 ### Compile the file
 ```
