@@ -2,7 +2,7 @@
 
 ### Compile the file
 ```
-gcc main.c -o main -pthread
+make main
 ```
 
 ### Execute

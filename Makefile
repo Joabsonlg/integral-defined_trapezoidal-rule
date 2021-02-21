@@ -1,2 +1,2 @@
 main: main.c
-	gcc main.c -o main -pthread
+	gcc main.c -o main -lm -pthread
