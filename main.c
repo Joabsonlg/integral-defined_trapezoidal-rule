@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-// Declaração do vetor para armazenar o valor da subárea calculada por cada thread
+// Declaração do vetor para armazenar o valor da subárea calculada por cada
+// thread
 double *threadsResults;
 
 double a, b, h;            // Function limits with b>a
@@ -35,8 +36,8 @@ int main(int argc, char *argv[]) {
   a = 0.0;
 
   // Atribuindo Valor para b
-   b = 2.0 * M_PI;
-  // b = 10.0;
+  // b = 2.0 * M_PI;
+  b = 10.0;
 
   // Trapezoid height
   h = (b - a) / nTrapezoids;
@@ -49,7 +50,8 @@ int main(int argc, char *argv[]) {
   // Vetor que armazena o id de cada thread criada
   pthread_t *threads = malloc(nThreads * sizeof(pthread_t));
 
-  // Alocação do vetor para armazenar o valor da subárea calculada por cada thread
+  // Alocação do vetor para armazenar o valor da subárea calculada por cada
+  // thread
   threadsResults = malloc(nThreads * sizeof(double));
 
   // Criar threads
@@ -61,11 +63,11 @@ int main(int argc, char *argv[]) {
   for (i = 0; i < nThreads; i++) {
     pthread_join(threads[i], &thread_return);
     result += threadsResults[i];
-    printf("Resultado da Thread %d = %lf\n", i, threadsResults[i]);
+    printf("Resultado da Thread %d = %.2e\n", i, threadsResults[i]);
   }
 
-  printf("Com %d trapézios, %d threads, limite a: %f, limite b: %f o resultado "
-         "final é: %f\n",
+  printf("Com %d trapézios, %d threads, limite a: %.2e, limite b: %.2e o resultado "
+         "final é: %.2e\n",
          nTrapezoids, nThreads, a, b, result);
 
   free(threads);
@@ -93,15 +95,15 @@ void *calcAreaTrap(void *tid) {
     local_b = local_a + local_n * h;
   }
 
-  printf("Thread %d: local_n = %d; local_a = %lf ; local_b = %lf\n",
+  printf("Thread %d: local_n = %d; local_a = %.2e ; local_b = %.2e\n",
          (int)(size_t)tid, local_n, local_a, local_b);
 
   // Cálculo da área do subconjunto de trapézios da Thread
-  result = (f2(local_a) + f2(local_b)) / 2.0;
+  result = (f1(local_a) + f1(local_b)) / 2.0;
 
   for (i = 1; i < local_n; i++) {
     double x_i = local_a + i * h;
-    result += f2(x_i);
+    result += f1(x_i);
   }
 
   result = h * result;
