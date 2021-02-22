@@ -66,6 +66,9 @@ int main(int argc, char *argv[]) {
     printf("Resultado da Thread %d = %.2e\n", i, threadsResults[i]);
   }
 
+  //Se o zero for negativo a notacao cientifica não é exibida corretamente
+  if ((int) result == -0) result = 0.00;
+
   printf("Com %d trapézios, %d threads, limite a: %.2e, limite b: %.2e o resultado "
          "final é: %.2e\n",
          nTrapezoids, nThreads, a, b, result);
