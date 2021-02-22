@@ -4,11 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-// Por enquanto o vetor está sendo alocado estaticamente para fins de teste
-// Tem que modificar para alocar dinamicamente de acordo com o número de Threads
-// passado pelo usuário
-#define NTHREADS 6
-double threadsResults[NTHREADS];
+// Declaração do vetor para armazenar o valor da subárea calculada por cada thread
+double *threadsResults;
 
 double a, b, h;            // Function limits with b>a
 int nThreads, nTrapezoids; // Number of threads and trapezoids
@@ -28,7 +25,8 @@ int main(int argc, char *argv[]) {
   int status, i;       // thread creation status and iterator
   void *thread_return; // thread return
 
-  nThreads = NTHREADS;
+  printf("Número de threads:\n");
+  scanf("%d", &nThreads);
 
   printf("Número de trapézios:\n");
   scanf("%d", &nTrapezoids);
@@ -37,8 +35,8 @@ int main(int argc, char *argv[]) {
   a = 0.0;
 
   // Atribuindo Valor para b
-  // b = 2.0 * M_PI;
-  b = 10.0;
+   b = 2.0 * M_PI;
+  // b = 10.0;
 
   // Trapezoid height
   h = (b - a) / nTrapezoids;
@@ -48,23 +46,30 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  pthread_t threads[nThreads];
+  // Vetor que armazena o id de cada thread criada
+  pthread_t *threads = malloc(nThreads * sizeof(pthread_t));
+
+  // Alocação do vetor para armazenar o valor da subárea calculada por cada thread
+  threadsResults = malloc(nThreads * sizeof(double));
 
   // Criar threads
   for (i = 0; i < nThreads; i++) {
     status = pthread_create(&threads[i], NULL, calcAreaTrap, (void *)(size_t)i);
   }
 
-  // esperando todas as threads terminarem e somando o resultado de cada uma
+  // Esperando todas as threads terminarem e somando o resultado de cada uma
   for (i = 0; i < nThreads; i++) {
     pthread_join(threads[i], &thread_return);
     result += threadsResults[i];
-    printf("Partial result = %lf\n", result);
+    printf("Resultado da Thread %d = %lf\n", i, threadsResults[i]);
   }
 
   printf("Com %d trapézios, %d threads, limite a: %f, limite b: %f o resultado "
          "final é: %f\n",
          nTrapezoids, nThreads, a, b, result);
+
+  free(threads);
+  free(threadsResults);
   return 0;
 }
 
@@ -78,8 +83,7 @@ void *calcAreaTrap(void *tid) {
     // trapezoid number for that thread
     local_n = nTrapezoids / nThreads + nTrapezoids % nThreads;
 
-    // local_a = a + nTrapezoids / nThreads * h * (int)(size_t)tid;
-    local_a = a + local_n * h * (int)(size_t)tid;
+    local_a = a + nTrapezoids / nThreads * h * (int)(size_t)tid;
     local_b = b;
   } else {
     // trapezoid number for that thread
@@ -92,18 +96,17 @@ void *calcAreaTrap(void *tid) {
   printf("Thread %d: local_n = %d; local_a = %lf ; local_b = %lf\n",
          (int)(size_t)tid, local_n, local_a, local_b);
 
-  // cálculo da área do subconjunto de trapézios da Thread usando a Solução 2 do
-  // video
-  result = (f1(local_a) + f1(local_b)) / 2.0;
+  // Cálculo da área do subconjunto de trapézios da Thread
+  result = (f2(local_a) + f2(local_b)) / 2.0;
 
   for (i = 1; i < local_n; i++) {
-    int x_i = local_a + i * h;
-    result += f1(x_i);
+    double x_i = local_a + i * h;
+    result += f2(x_i);
   }
 
   result = h * result;
 
-  // escrevendo o resultado no vetor
+  // Escrevendo o resultado no vetor em memória compartilhada
   threadsResults[(int)(size_t)tid] = result;
 
   sleep(1);
