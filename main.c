@@ -9,6 +9,7 @@ double *threadsResults;
 
 double a, b, h;            // Function limits with b>a
 int nThreads, nTrapezoids; // Number of threads and trapezoids
+int function;
 
 // Calculates the trapezoid area
 void *calcAreaTrap(void *tid);
@@ -25,6 +26,14 @@ int main(int argc, char *argv[]) {
   int status, i;       // thread creation status and iterator
   void *thread_return; // thread return
 
+  printf("Digite 1 para executar f1(x) = 5.0\n");
+  printf("Digite 2 para executar f2(x) = sen(2.0*x) + cos(5.0*x)\n");
+  scanf("%d", &function);
+  if (function != 1 && function != 2) {
+    printf("Entrada inválida!\n");
+    return 0;
+  }
+
   printf("Número de threads:\n");
   scanf("%d", &nThreads);
 
@@ -35,8 +44,7 @@ int main(int argc, char *argv[]) {
   a = 0.0;
 
   // Assigning Value to b
-  // b = 2.0 * M_PI;
-  b = 10.0;
+  b = function == 1 ? 10 : 2.0 * M_PI;
 
   // Trapezoid height
   h = (b - a) / nTrapezoids;
@@ -64,10 +72,8 @@ int main(int argc, char *argv[]) {
     printf("Resultado da Thread %d = %.2e\n", i, threadsResults[i]);
   }
 
-  // If the zero is negative the scientific notation is not displayed correctly
-  if ((int) result == -0) result = 0.00;
-
-  printf("Com %d trapézios, %d threads, limite a: %.2e, limite b: %.2e o resultado "
+  printf("Com %d trapézios, %d threads, limite a: %.2e, limite b: %.2e o "
+         "resultado "
          "final é: %.2e\n",
          nTrapezoids, nThreads, a, b, result);
 
@@ -98,11 +104,12 @@ void *calcAreaTrap(void *tid) {
          (int)(size_t)tid, local_n, local_a, local_b);
 
   // Calculation of the area of ​​the thread trapezoid subset
-  result = (f1(local_a) + f1(local_b)) / 2.0;
+  result = function == 1 ? (f1(local_a) + f1(local_b)) / 2.0
+                         : (f2(local_a) + f2(local_b)) / 2.0;
 
   for (i = 1; i < local_n; i++) {
     double x_i = local_a + i * h;
-    result += f1(x_i);
+    result += function == 1 ? f1(x_i) : f2(x_i);
   }
 
   result = h * result;
